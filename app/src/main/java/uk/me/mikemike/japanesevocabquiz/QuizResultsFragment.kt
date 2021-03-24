@@ -23,6 +23,10 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import com.github.mikephil.charting.data.PieData
+import com.github.mikephil.charting.data.PieDataSet
+import com.github.mikephil.charting.data.PieEntry
 import kotlinx.android.synthetic.main.fragment_quiz_results.*
 
 
@@ -55,6 +59,33 @@ class QuizResultsFragment() : QuizBaseFragment() {
         }
     }
 
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        viewModel.quiz.observe(viewLifecycleOwner, Observer{
+            if(it != null) updateUI(it)
+        })
+    }
+
+    private fun updateUI(quiz: Quiz){
+        pie_chart.setUsePercentValues(true)
+
+        var entries: MutableList<PieEntry> = mutableListOf<PieEntry>()
+        var correct = PieEntry(quiz.correctPercent.toFloat())
+        var wrong = PieEntry(quiz.wrongPercent.toFloat())
+        entries.add(correct)
+        entries.add(wrong)
+
+        var dataSet = PieDataSet(entries, "Results")
+
+        var data:PieData = PieData(dataSet)
+
+        pie_chart.data = data
+
+        Log.i("Debug", quiz.toString())
+        Log.i("Debug", "Correct:" + quiz.correctPercent)
+        Log.i("Debug", "Wrong:" + quiz.wrongPercent)
+    }
 
     companion object{
         @JvmStatic

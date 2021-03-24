@@ -17,14 +17,15 @@ limitations under the License.
 */
 package uk.me.mikemike.japanesevocabquiz
 
+import android.util.Log
 import java.lang.IllegalStateException
 import java.util.*
+import kotlin.math.roundToInt
 
 class Quiz (val allItems: List<VocabItem>, var numberOfAnswersToGenerate : Int) {
 
     var correctAnswers: MutableList<VocabItem> = mutableListOf()
     var wrongAnswers: MutableList<VocabItem> = mutableListOf()
-
     var currentQuestion: VocabItem? = null
     var currentQuestionAnswers: MutableList<VocabItem> = mutableListOf()
     val remainingItems: Queue<VocabItem> = LinkedList(allItems)
@@ -39,24 +40,14 @@ class Quiz (val allItems: List<VocabItem>, var numberOfAnswersToGenerate : Int) 
     val correctAnswerCount get() = correctAnswers.size
     val wrongAnswerCount get() = wrongAnswers.size
     val isEmpty get() = totalQuestions == 0
+    val correctRatio get() = (if(correctAnswerCount == 0) 0f else { correctAnswerCount.toFloat() / totalQuestions.toFloat() })
+    val correctPercent get() = (100f * correctRatio).roundToInt()
+    val wrongRatio get() = (if(wrongAnswerCount == 0) 0f else { wrongAnswerCount.toFloat() / totalQuestions.toFloat() })
+    val wrongPercent get() = (100f * wrongRatio).roundToInt()
 
     init {
         numberOfAnswersToGenerate = if(numberOfAnswersToGenerate > allItems.size) allItems.size else numberOfAnswersToGenerate
         reset()
-    }
-
-    fun answerQuestion(answerIndex: Int): Boolean{
-        return answerQuestion(currentQuestionAnswers[answerIndex])
-    }
-
-    fun answerQuestion(answer: VocabItem): Boolean{
-        if(!isFinished) {
-            val result = currentQuestion!!.id == answer.id
-            (if (result) correctAnswers else wrongAnswers).add(currentQuestion!!)
-            getNextQuestion()
-            return result
-        }
-        throw IllegalStateException("The test is finished but answerQuestion was called")
     }
 
     private fun getNextQuestion(){
@@ -85,6 +76,27 @@ class Quiz (val allItems: List<VocabItem>, var numberOfAnswersToGenerate : Int) 
         correctAnswers.clear()
         wrongAnswers.clear()
         getNextQuestion()
+    }
+
+    public override fun toString(): String {
+       return "Details-> Total Questions:$totalQuestions, Remaining Questions:$remainingQuestionCount"+
+        "\n Correct-> Answers:$correctAnswerCount, Ratio:$correctRatio, Percent:$correctPercent"+
+                "\n Wrong-> Answers:$wrongAnswerCount, Ration:$wrongRatio, Percent$wrongPercent"
+    }
+
+    public fun answerQuestion(answerIndex: Int): Boolean{
+        return answerQuestion(currentQuestionAnswers[answerIndex])
+    }
+
+    public fun answerQuestion(answer: VocabItem): Boolean{
+
+        if(!isFinished) {
+            val result = currentQuestion!!.id == answer.id
+            (if (result) correctAnswers else wrongAnswers).add(currentQuestion!!)
+            getNextQuestion()
+            return result
+        }
+        throw IllegalStateException("The test is finished but answerQuestion was called")
     }
 
 }
