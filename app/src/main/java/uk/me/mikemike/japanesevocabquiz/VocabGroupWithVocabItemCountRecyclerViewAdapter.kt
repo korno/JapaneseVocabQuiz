@@ -36,10 +36,20 @@ class VocabGroupWithVocabItemCountRecyclerViewAdapter(
     private val selectedListener: VocabGroupListener
 ) : RecyclerView.Adapter<VocabGroupWithVocabItemCountRecyclerViewAdapter.ViewHolder>() {
 
+    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+
+        public fun bindVocabGroup(vals: VocabGroupWithVocabItemCount){
+            itemView.vocabgroup_name.text = vals.vocabGroup.name
+            itemView.vocabgroup_description.text = vals.vocabGroup.description
+            itemView.start_quiz_button.setOnClickListener {
+                selectedListener.onSelected(vals)
+            }
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-            .inflate(R.layout.fragment_vocabgroup_item, parent, false)
+            .inflate(R.layout.adapter_vocabgroupitem, parent, false)
         return ViewHolder(view)
     }
 
@@ -54,16 +64,8 @@ class VocabGroupWithVocabItemCountRecyclerViewAdapter(
         notifyDataSetChanged()
     }
 
+
     override fun getItemCount(): Int = values.size
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
 
-        public fun bindVocabGroup(vals: VocabGroupWithVocabItemCount){
-            itemView.vocabgroup_name.text = vals.vocabGroup.name
-            itemView.vocabgroup_description.text = vals.vocabGroup.description
-            itemView.start_quiz_button.setOnClickListener {
-               selectedListener.onSelected(vals)
-            }
-        }
-    }
 }

@@ -24,6 +24,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 import com.github.mikephil.charting.data.PieEntry
@@ -78,13 +80,14 @@ class QuizResultsFragment() : QuizBaseFragment() {
 
         var dataSet = PieDataSet(entries, "Results")
 
-        var data:PieData = PieData(dataSet)
+        var data = PieData(dataSet)
 
         pie_chart.data = data
 
-        Log.i("Debug", quiz.toString())
-        Log.i("Debug", "Correct:" + quiz.correctPercent)
-        Log.i("Debug", "Wrong:" + quiz.wrongPercent)
+
+        mistakes_list.adapter = VocabItemRecyclerViewAdapter(quiz.wrongAnswers, true)
+        mistakes_list.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
+
     }
 
     companion object{
