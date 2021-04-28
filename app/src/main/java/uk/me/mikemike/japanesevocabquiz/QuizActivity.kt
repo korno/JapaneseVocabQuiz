@@ -21,36 +21,47 @@ import android.content.Context
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.viewModels
 import androidx.lifecycle.Observer
+import androidx.preference.PreferenceManager
 
 interface QuizActivityInterface {
-    public val factory: QuizViewModelFactory
+    public val mFactory: QuizViewModelFactory
 }
 
-class QuizActivity : AppCompatActivity(), QuizActivityInterface, QuizResulsFragmentListener {
+class QuizActivity : AppCompatActivity(), QuizActivityInterface {
 
-    private var uuid : String = ""
 
-    private val viewModel: QuizViewModel by viewModels{
-       factory
+    companion object{
+        val UUID_PARAM_NAME = "uuid"
+        @JvmStatic
+        fun createIntent(uuid: String,  context: Context) : Intent {
+            val intent = Intent(context, QuizActivity::class.java)
+            intent.putExtra(UUID_PARAM_NAME, uuid)
+            return intent
+        }
     }
 
-    override val factory by lazy {
-        QuizViewModelFactory((this.application as JapaneseVocabQuizApplication).repository, uuid)
+    private var mUUID : String = ""
+
+
+    private val mViewModel: QuizViewModel by viewModels{
+       mFactory
+    }
+
+    override val mFactory by lazy {
+        QuizViewModelFactory((this.application as JapaneseVocabQuizApplication).repository, mUUID)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        uuid = intent.extras!!.getString(UUID_PARAM_NAME, "error")
-        if(uuid == "error"){
-            quit()
+        mUUID = intent.extras!!.getString(UUID_PARAM_NAME, "error")
+        if(mUUID == "error"){
+           finish()
         }
         setContentView(R.layout.activity_quiz)
-        viewModel.quiz.observe(this, Observer {
+        mViewModel.quiz.observe(this, Observer {
             if(it.isEmpty){
-                Log.w("JVQ", "A quiz with no items was created")
                 finish()
             }
             else {
@@ -64,48 +75,28 @@ class QuizActivity : AppCompatActivity(), QuizActivityInterface, QuizResulsFragm
 
         })
 
+        mViewModel.vocabGroup.observe(this,
+        Observer {
+            supportActionBar?.title = it.vocabGroup.name
+            title= it.vocabGroup.name
+        })
+
+
+
     }
+
 
     private fun showResults(){
         with(supportFragmentManager.beginTransaction()){
-            replace(R.id.container, QuizResultsFragment.newInstance())
+            replace(R.id.container, QuizResultsFragment.newInstance(getJapaneseDisplayMode()))
             commitNow()
         }
     }
 
     private fun startQuiz(){
-
         with(supportFragmentManager.beginTransaction()) {
-            replace(R.id.container, QuizFragment.newInstance())
+            replace(R.id.container, QuizFragment.newInstance(getJapaneseDisplayMode()))
             commitNow()
         }
-    }
-
-
-    private fun restart(){
-        viewModel.restartTest()
-    }
-
-    private fun quit(){
-        finish()
-    }
-
-    companion object{
-
-        val UUID_PARAM_NAME = "uuid"
-
-        fun createIntent(uuid: String, context: Context) : Intent {
-            val intent = Intent(context, QuizActivity::class.java)
-            intent.putExtra(UUID_PARAM_NAME, uuid)
-            return intent
-        }
-    }
-
-    override fun onRestartChosen() {
-        restart()
-    }
-
-    override fun onFinishChosen() {
-       quit()
     }
 }

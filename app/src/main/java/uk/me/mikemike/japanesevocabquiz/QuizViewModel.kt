@@ -27,6 +27,7 @@ class QuizViewModel(private val vocabGroupUUID: String, private val repositoryJa
 
     public val vocabGroup: LiveData<VocabGroupWithVocabItems> = repositoryJapanese.getVocabGroupWithVocabItemsByUUID((vocabGroupUUID))
 
+
     public val quiz: MutableLiveData<Quiz> by lazy{
         val q = MutableLiveData<Quiz>()
         viewModelScope.launch(Dispatchers.IO){

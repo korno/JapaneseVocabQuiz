@@ -23,14 +23,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.adapter_vocabitem.view.*
 
-class VocabItemRecyclerViewAdapter(var values: List<VocabItem>, val kanaForJapanese: Boolean) : RecyclerView.Adapter<VocabItemRecyclerViewAdapter.ViewHolder> () {
+class VocabItemRecyclerViewAdapter(var values: List<VocabItem>, val displayMode: Int) : RecyclerView.Adapter<VocabItemRecyclerViewAdapter.ViewHolder> () {
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         public fun bindToVocabItem(item: VocabItem){
-            itemView.kanji_textview.text = item.kanji
-            itemView.mainlanguage_textview.text = item.meaning
-            itemView.kana_textview.text = if (kanaForJapanese) item.kana else item.romaji
-
+            itemView.kanji_textview.text = item.kanji ?: item.kana
+            itemView.romaji_textview.text = item.meaning
+            itemView.kana_textview.text = item.kana
+            itemView.mainlanguage_textview.text = item.romaji
         }
     }
 

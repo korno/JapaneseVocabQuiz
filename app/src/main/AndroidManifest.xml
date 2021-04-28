@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="uk.me.mikemike.japanesevocabquiz">
 
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+
+
     <application
         android:name=".JapaneseVocabQuizApplication"
         android:allowBackup="true"
@@ -10,7 +14,20 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.JapaneseVocabQuiz">
-        <activity android:name=".QuizActivity"></activity>
+
+
+        <!--
+               Set to true if your app is Standalone, that is, it does not require the handheld
+               app to run.
+        -->
+        <meta-data
+            android:name="com.google.android.wearable.standalone"
+            android:value="true" />
+
+        <activity
+            android:name=".PreferenceActivity"
+            android:label="@string/title_activity_preference"></activity>
+        <activity android:name=".QuizActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

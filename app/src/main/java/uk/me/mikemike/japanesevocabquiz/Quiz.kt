@@ -17,7 +17,6 @@ limitations under the License.
 */
 package uk.me.mikemike.japanesevocabquiz
 
-import android.util.Log
 import java.lang.IllegalStateException
 import java.util.*
 import kotlin.math.roundToInt
@@ -44,6 +43,9 @@ class Quiz (val allItems: List<VocabItem>, var numberOfAnswersToGenerate : Int) 
     val correctPercent get() = (100f * correctRatio).roundToInt()
     val wrongRatio get() = (if(wrongAnswerCount == 0) 0f else { wrongAnswerCount.toFloat() / totalQuestions.toFloat() })
     val wrongPercent get() = (100f * wrongRatio).roundToInt()
+
+
+    val progressPercentage get() = 100 - ((100f * remainingRatio)).roundToInt()
 
     init {
         numberOfAnswersToGenerate = if(numberOfAnswersToGenerate > allItems.size) allItems.size else numberOfAnswersToGenerate

@@ -24,33 +24,52 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.lifecycle.Observer
-
+import kotlinx.android.synthetic.main.adapter_vocabitem.*
 import kotlinx.android.synthetic.main.fragment_quiz.*
-import kotlin.math.roundToInt
 
 
 class QuizFragment : QuizBaseFragment() {
 
-    private var mToast : Toast? = null
-
     companion object {
-        fun newInstance() = QuizFragment()
+
+        const val QUESTION_MODE_JAPANESE_QUESTION = 1
+        const val QUESTION_MODE_MAIN_LANGUAGE_QUESTION = 2
+        const val QUESTION_MODE_RANDOM = 3
+
+        public val DISPLAY_MODE_PARAM_NAME = "japanese_mode"
+        public val QUESTION_MODE_PARAM_NAME = "question_mode"
+
+        @JvmStatic
+        fun newInstance(mode: Int, questionMode: Int): QuizFragment {
+            var b = Bundle()
+            b.putInt(DISPLAY_MODE_PARAM_NAME, mode)
+            b.putInt(QUESTION_MODE_PARAM_NAME, questionMode)
+            return QuizFragment().apply {
+                arguments = b
+            }
+
+        }
     }
 
+    private var mToast: Toast? = null
+    private var mDisplayMode = JapaneseVocabQuiz.DEFAULT_JAPANESE_DISPLAY
+    private var mQuestionMode: Int = QuizFragment.QUESTION_MODE_JAPANESE_QUESTION
 
-    private fun showToast(t: Toast){
+
+    private fun showToast(t: Toast) {
         mToast?.cancel()
         mToast = t
         t.show()
     }
 
-    private val buttonClick = View.OnClickListener{
-        showToast(if(viewModel.answerQuizQuestion(Integer.valueOf(it.tag as String))){
-            Toast.makeText(requireContext(), "Correct!", Toast.LENGTH_SHORT)
-        }
-        else{
-            Toast.makeText(requireContext(), "Wrong!", Toast.LENGTH_SHORT)
-        })
+    private val buttonClick = View.OnClickListener {
+        showToast(
+            if (mViewModel.answerQuizQuestion(Integer.valueOf(it.tag as String))) {
+                Toast.makeText(requireContext(), "Correct!", Toast.LENGTH_SHORT)
+            } else {
+                Toast.makeText(requireContext(), "Wrong!", Toast.LENGTH_SHORT)
+            }
+        )
 
     }
 
@@ -67,30 +86,76 @@ class QuizFragment : QuizBaseFragment() {
         answer_2_button.setOnClickListener(buttonClick)
         answer_3_button.setOnClickListener(buttonClick)
         answer_4_button.setOnClickListener(buttonClick)
+
     }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel.quiz.observe(viewLifecycleOwner, Observer {
-            if(it.isInProgress || it.isNew){
+        val source = savedInstanceState ?: arguments
+        mDisplayMode = source?.getInt(DISPLAY_MODE_PARAM_NAME, mDisplayMode) ?: mDisplayMode
+        mViewModel.quiz.observe(viewLifecycleOwner, Observer {
+            if (it.isInProgress || it.isNew) {
                 // next question
                 refreshUI(it)
             }
         })
     }
 
-    private fun refreshUI(quiz: Quiz){
-        // Data binding is probably better here, need to learn it...
-        question_textview.text = quiz.currentQuestion!!.kana
-        answer_1_button.text = quiz.currentQuestionAnswers[0].meaning
-        answer_2_button.text = quiz.currentQuestionAnswers[1].meaning
-        answer_3_button.text = quiz.currentQuestionAnswers[2].meaning
-        answer_4_button.text = quiz.currentQuestionAnswers[3].meaning
-        quiz_progress.progress = 100 - ((100f * quiz.remainingRatio)).roundToInt()
-        question_count_textview.text = resources.getString(R.string.format_question_count, quiz.currenQuestionNumber, quiz.totalQuestions)
-        correctcount_textview.text = quiz.correctAnswerCount.toString();
-        wrongcount_textview.text = quiz.wrongAnswerCount.toString()
-
+    private fun refreshUI(quiz: Quiz) {
+        val updateFun = when (mQuestionMode) {
+            QUESTION_MODE_JAPANESE_QUESTION -> {
+                ::setQuestionJapaneseQuestion
+            }
+            QUESTION_MODE_MAIN_LANGUAGE_QUESTION -> {
+                ::setQuestionMainLanguageQuestion
+            }
+            else -> ::setQuestionJapaneseQuestion
+        }
+        updateFun(quiz)
+        updateProgress(quiz)
     }
 
+
+    private fun setQuestionJapaneseQuestion(quiz: Quiz) {
+        val current = quiz.currentQuestion
+        if (current != null) {
+            question_textview.text = getCorrectJapanese(current, mDisplayMode)
+            answer_1_button.text = quiz.currentQuestionAnswers[0].meaning
+            answer_2_button.text = quiz.currentQuestionAnswers[1].meaning
+            answer_3_button.text = quiz.currentQuestionAnswers[2].meaning
+            answer_4_button.text = quiz.currentQuestionAnswers[3].meaning
+        }
+    }
+
+
+    private fun setQuestionMainLanguageQuestion(quiz: Quiz) {
+        val current =  quiz.currentQuestion
+        if(current != null){
+            mainlanguage_textview.text = current.meaning
+            answer_1_button.text = getCorrectJapanese(quiz.currentQuestionAnswers[0], mDisplayMode)
+            answer_2_button.text = getCorrectJapanese(quiz.currentQuestionAnswers[1], mDisplayMode)
+            answer_3_button.text = getCorrectJapanese(quiz.currentQuestionAnswers[2], mDisplayMode)
+            answer_4_button.text = getCorrectJapanese(quiz.currentQuestionAnswers[3], mDisplayMode)
+        }
+    }
+
+
+    private fun updateProgress(quiz: Quiz){
+        quiz_progress.progress = quiz.progressPercentage
+        question_count_textview.text = resources.getString(
+            R.string.format_question_count,
+            quiz.currenQuestionNumber,
+            quiz.totalQuestions
+        )
+        correctcount_textview.text = quiz.correctAnswerCount.toString();
+        wrongcount_textview.text = quiz.wrongAnswerCount.toString()
+    }
+
+
+
+
 }
+
+
+
+

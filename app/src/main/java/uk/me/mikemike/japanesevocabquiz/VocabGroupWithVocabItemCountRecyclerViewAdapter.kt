@@ -25,7 +25,7 @@ import android.view.ViewGroup
 
 
 
-import kotlinx.android.synthetic.main.fragment_vocabgroup_item.view.*;
+import kotlinx.android.synthetic.main.adapter_vocabgroupitem.view.*;
 
 class VocabGroupListener(val selectListener: (value: VocabGroupWithVocabItemCount) -> Unit){
     fun onSelected(value: VocabGroupWithVocabItemCount) = selectListener(value)

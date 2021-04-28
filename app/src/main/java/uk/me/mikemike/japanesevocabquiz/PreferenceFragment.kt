@@ -17,25 +17,19 @@ limitations under the License.
 */
 package uk.me.mikemike.japanesevocabquiz
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import kotlinx.android.synthetic.main.activity_main.*
+import androidx.preference.PreferenceFragmentCompat
 
-class MainActivity : AppCompatActivity() {
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        bottomAppBar.setOnMenuItemClickListener {
-            when(it.itemId){
-                R.id.action_settings -> { showSettings()
-                    true }
-                else -> false
-            }
-        }
+class PreferenceFragment : PreferenceFragmentCompat() {
+
+    companion object{
+        @JvmStatic
+        public fun newInstance() = PreferenceFragment()
     }
 
-    private fun showSettings(){
-        startActivity(PreferenceActivity.createIntent(this))
+
+    override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
+        setPreferencesFromResource(R.xml.preferences, rootKey)
     }
 }

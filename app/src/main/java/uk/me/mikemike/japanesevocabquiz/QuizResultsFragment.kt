@@ -18,13 +18,10 @@ limitations under the License.
 package uk.me.mikemike.japanesevocabquiz
 
 import android.os.Bundle
-import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
@@ -32,22 +29,25 @@ import com.github.mikephil.charting.data.PieEntry
 import kotlinx.android.synthetic.main.fragment_quiz_results.*
 
 
-
-
-interface QuizResulsFragmentListener{
-    fun onRestartChosen()
-    fun onFinishChosen()
-}
-
 class QuizResultsFragment() : QuizBaseFragment() {
 
-    private val mListener: QuizResulsFragmentListener by lazy(){
-        requireActivity() as QuizResulsFragmentListener
+    companion object{
+
+        public val MODE_PARAM_NAME = "japanese_mode"
+
+        @JvmStatic
+        fun newInstance(mode: Int) : QuizResultsFragment {
+            var b = Bundle()
+            b.putInt(MODE_PARAM_NAME, mode)
+            return QuizResultsFragment().apply {
+                arguments = b
+            }
+
+        }
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-    }
+
+    private var mMode = JapaneseVocabQuiz.DEFAULT_JAPANESE_DISPLAY
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -57,14 +57,20 @@ class QuizResultsFragment() : QuizBaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         restart_button.setOnClickListener {
-            mListener.onRestartChosen()
+            mViewModel.restartTest()
+        }
+        //probably shouldnt force the activity to close from a fragment???
+        finish_button.setOnClickListener {
+            requireActivity().finish()
         }
     }
 
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
-        viewModel.quiz.observe(viewLifecycleOwner, Observer{
+        val source = savedInstanceState ?: arguments
+        mMode = source?.getInt(QuizFragment.DISPLAY_MODE_PARAM_NAME, mMode) ?:mMode
+        mViewModel.quiz.observe(viewLifecycleOwner, Observer{
             if(it != null) updateUI(it)
         })
     }
@@ -78,20 +84,21 @@ class QuizResultsFragment() : QuizBaseFragment() {
         entries.add(correct)
         entries.add(wrong)
 
+
+
         var dataSet = PieDataSet(entries, "Results")
+
+
 
         var data = PieData(dataSet)
 
         pie_chart.data = data
 
 
-        mistakes_list.adapter = VocabItemRecyclerViewAdapter(quiz.wrongAnswers, true)
+        mistakes_list.adapter = VocabItemRecyclerViewAdapter(quiz.wrongAnswers, mMode)
         mistakes_list.layoutManager = StaggeredGridLayoutManager(2, StaggeredGridLayoutManager.VERTICAL);
 
     }
 
-    companion object{
-        @JvmStatic
-        fun newInstance() = QuizResultsFragment()
-    }
+
 }

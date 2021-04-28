@@ -17,9 +17,28 @@ limitations under the License.
 */
 package uk.me.mikemike.japanesevocabquiz
 
+import android.app.Activity
 import android.app.Application
+
+import androidx.preference.PreferenceManager
 
 class JapaneseVocabQuizApplication : Application() {
     val database by lazy {JapaneseVocabQuizDatabase.getInstance(this)}
     val repository by lazy {JapaneseVocabQuizRepository(database)}
+}
+
+
+object JapaneseVocabQuiz {
+    const val JAPANESE_DISPLAY_KANJI = 0
+    const val JAPANESE_DISPLAY_KANA = 1
+    const val JAPANESE_DISPLAY_ROMAJI = 2
+
+
+    const val DEFAULT_JAPANESE_DISPLAY = JAPANESE_DISPLAY_KANA
+}
+
+
+fun Activity.getJapaneseDisplayMode(): Int{
+    val modeS = PreferenceManager.getDefaultSharedPreferences(this).getString("japanese_mode", JapaneseVocabQuiz.DEFAULT_JAPANESE_DISPLAY.toString())
+    return modeS?.toInt() ?: JapaneseVocabQuiz.DEFAULT_JAPANESE_DISPLAY
 }

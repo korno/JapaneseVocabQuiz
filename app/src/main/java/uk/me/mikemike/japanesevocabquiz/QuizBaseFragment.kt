@@ -21,7 +21,21 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 
 open class QuizBaseFragment : Fragment() {
-    protected val viewModel: QuizViewModel by activityViewModels{
-        (requireActivity() as QuizActivityInterface).factory
+    protected val mViewModel: QuizViewModel by activityViewModels{
+        (requireActivity() as QuizActivityInterface).mFactory
     }
+
+    protected fun getCorrectJapanese(item: VocabItem, mode: Int): String{
+        return  when (mode) {
+            JapaneseVocabQuiz.JAPANESE_DISPLAY_KANJI -> {
+                // sometimes the kanji is not present
+                item.kanji ?: item.kana
+            }
+            JapaneseVocabQuiz.JAPANESE_DISPLAY_KANA -> item.kana
+            JapaneseVocabQuiz.JAPANESE_DISPLAY_ROMAJI -> item.romaji
+            else -> item.romaji
+        }
+    }
+
+
 }
